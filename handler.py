@@ -14,7 +14,7 @@ try:
         "Qwen/Qwen-Image-Edit-2511",  # Klasör yolu yerine model ID kullan
         torch_dtype=torch.bfloat16,
         local_files_only=True,  # İnternete gitmesini kesin olarak engeller
-        device_map="auto",
+        device_map="cuda",
     )
     # Bellek optimizasyonu için (Opsiyonel)
     # pipe.enable_model_cpu_offload()
