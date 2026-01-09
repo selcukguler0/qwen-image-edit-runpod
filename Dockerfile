@@ -1,21 +1,27 @@
-# 1. Aşama: Güncel ve optimize edilmiş bir PyTorch imajı kullan
 FROM runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
 
-# 2. Aşama: Çalışma dizinini ayarla
 WORKDIR /app
 
-# 3. Aşama: Gerekli kütüphaneleri kur
-# Qwen-Image-Edit-2511 gibi modeller için transformers'ın güncel olması kritiktir.
+# Hızlı indirme için HF_TRANSFER'i aktif et
+ENV HF_HUB_ENABLE_HF_TRANSFER=1
+
+# Gerekli kütüphaneleri kur
+# 8-bit (FP8 benzeri) kullanım için 'bitsandbytes' ekledik
 RUN pip install --no-cache-dir \
     diffusers \
     transformers \
     accelerate \
     runpod \
     requests \
-    pillow
+    pillow \
+    bitsandbytes \
+    hf_transfer
 
-# 4. Aşama: Handler dosyanı ve varsa model ağırlıklarını kopyala
+# Önce indirme scriptini kopyala ve MODELLERİ İNDİR
+COPY download_model.py /app/download_model.py
+RUN python /app/download_model.py
+
+# Sonra handler kodunu kopyala
 COPY handler.py /app/handler.py
 
-# 5. Aşama: RunPod'un handler'ı tetiklemesini sağla
 CMD ["python", "-u", "/app/handler.py"]
