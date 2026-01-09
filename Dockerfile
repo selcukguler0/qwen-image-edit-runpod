@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir \
 
 # Önce indirme scriptini kopyala ve MODELLERİ İNDİR
 COPY download_model.py /app/download_model.py
-RUN python /app/download_model.py
+RUN python -u /app/download_model.py
 
 # Sonra handler kodunu kopyala
 COPY handler.py /app/handler.py

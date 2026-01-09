@@ -47,31 +47,46 @@ def handler(event):
         job_input = event.get("input", {})
 
         prompt = job_input.get("prompt")
-        image_input = job_input.get("image")  # URL veya Base64
+        image_1 = job_input.get("image_1")  # URL veya Base64
+        image_2 = job_input.get("image_2")  # URL veya Base64 - isteğe bağlı
 
         # Opsiyonel parametreler (varsayılan değerlerle)
         steps = job_input.get("num_inference_steps", 40)
         guidance_scale = job_input.get("guidance_scale", 1.0)
         seed = job_input.get("seed", 42)
 
-        if not prompt or not image_input:
+        if not prompt or not image_1:
             return {"error": "Prompt ve image parametreleri zorunludur."}
-
-        # Görseli hazırla
-        input_image = decode_image(image_input)
 
         # Üretim (Inference)
         generator = torch.manual_seed(seed)
 
-        with torch.inference_mode():
-            output = pipe(
-                image=[input_image],
-                prompt=prompt,
-                generator=generator,
-                num_inference_steps=steps,
-                guidance_scale=guidance_scale,
-                negative_prompt="low quality, blurry, distorted",
-            )
+        # Görseli hazırla
+        image_1 = decode_image(image_1)
+
+        # 2. Görsel varsa
+        if image_2:
+            image_2 = decode_image(image_2)
+            with torch.inference_mode():
+                output = pipe(
+                    image=[image_1, image_2],
+                    prompt=prompt,
+                    generator=generator,
+                    num_inference_steps=steps,
+                    guidance_scale=guidance_scale,
+                    negative_prompt="low quality, blurry, distorted",
+                )
+        # Tek görsel varsa
+        else:
+            with torch.inference_mode():
+                output = pipe(
+                    image=[image_1],
+                    prompt=prompt,
+                    generator=generator,
+                    num_inference_steps=steps,
+                    guidance_scale=guidance_scale,
+                    negative_prompt="low quality, blurry, distorted",
+                )
 
         final_image = output.images[0]
 
