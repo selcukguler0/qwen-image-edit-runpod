@@ -18,10 +18,9 @@ RUN pip install --no-cache-dir \
     hf_transfer
 
 # Önce indirme scriptini kopyala ve MODELLERİ İNDİR
-COPY download_model.py /app/download_model.py
-RUN python -u /app/download_model.py
+COPY download_model.py .
+RUN python -u download_model.py && rm download_model.py
 
-# Sonra handler kodunu kopyala
-COPY handler.py /app/handler.py
-
-CMD ["python", "-u", "/app/handler.py"]
+COPY handler.py .
+# Artık /app/model_weights gibi ekstra klasörlere gerek kalmadı
+CMD ["python", "-u", "handler.py"]
