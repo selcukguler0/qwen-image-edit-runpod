@@ -2,3 +2,5 @@ test_endpoint.py
 *.jpg
 *.png
 util.py
+.env
+.env.local
