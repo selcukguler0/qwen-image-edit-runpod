@@ -11,9 +11,9 @@ print("Model yükleniyor... Bu biraz zaman alabilir.")
 try:
     # handler.py içinde pipeline yükleme kısmını şu şekilde güncelle:
     pipe = QwenImageEditPlusPipeline.from_pretrained(
-        "/app/model_weights",  # Cache yapısına göre değişebilir
+        "Qwen/Qwen-Image-Edit-2511",  # Klasör yolu yerine model ID kullan
         torch_dtype=torch.bfloat16,
-        local_files_only=True,  # İnternete gitmesini engeller
+        local_files_only=True,  # İnternete gitmesini kesin olarak engeller
         device_map="auto",
     )
     # Bellek optimizasyonu için (Opsiyonel)
