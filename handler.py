@@ -8,16 +8,22 @@ from diffusers import QwenImageEditPlusPipeline
 
 # 1. Modeli global alanda yükle (Cold Start sırasında bir kez çalışır)
 print("Model yükleniyor... Bu biraz zaman alabilir.")
+
 try:
-    # handler.py içinde pipeline yükleme kısmını şu şekilde güncelle:
+    # Pipeline'ı yükle - device_map yerine cpu_offload kullanıyoruz
     pipe = QwenImageEditPlusPipeline.from_pretrained(
-        "Qwen/Qwen-Image-Edit-2511",  # Klasör yolu yerine model ID kullan
-        torch_dtype=torch.bfloat16,
+        "Qwen/Qwen-Image-Edit-2511",
+        torch_dtype=torch.bfloat16,  # Bellek tasarrufu için half precision
         local_files_only=True,  # İnternete gitmesini kesin olarak engeller
-        device_map="cuda",
     )
-    # Bellek optimizasyonu için (Opsiyonel)
-    # pipe.enable_model_cpu_offload()
+
+    # Bellek optimizasyonu - model bileşenlerini GPU/CPU arasında akıllıca taşır
+    # Bu sayede sadece aktif olan bileşen GPU'da tutulur
+    pipe.enable_model_cpu_offload()
+
+    # Ek bellek optimizasyonları
+    pipe.enable_attention_slicing()  # Attention işlemlerini parçalara böler
+
     print("Model başarıyla yüklendi.")
 except Exception as e:
     print(f"Model yükleme hatası: {e}")
