@@ -2,27 +2,34 @@ import runpod
 import torch
 import base64
 import io
+import os
 import requests
 from PIL import Image
 from diffusers import QwenImageEditPlusPipeline
+
+# CUDA bellek fragmentasyonunu önlemek için
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 # 1. Modeli global alanda yükle (Cold Start sırasında bir kez çalışır)
 print("Model yükleniyor... Bu biraz zaman alabilir.")
 
 try:
-    # Pipeline'ı yükle - device_map yerine cpu_offload kullanıyoruz
+    # Pipeline'ı yükle
     pipe = QwenImageEditPlusPipeline.from_pretrained(
         "Qwen/Qwen-Image-Edit-2511",
         torch_dtype=torch.bfloat16,  # Bellek tasarrufu için half precision
         local_files_only=True,  # İnternete gitmesini kesin olarak engeller
     )
 
-    # Bellek optimizasyonu - model bileşenlerini GPU/CPU arasında akıllıca taşır
-    # Bu sayede sadece aktif olan bileşen GPU'da tutulur
-    pipe.enable_model_cpu_offload()
-
-    # Ek bellek optimizasyonları
-    pipe.enable_attention_slicing()  # Attention işlemlerini parçalara böler
+    # Qwen-Image için resmi olarak önerilen bellek optimizasyonu
+    # enable_group_offload: Layer gruplarını async stream ile GPU/CPU arasında taşır
+    # Bu yöntem sequential_cpu_offload'dan daha hızlı ve verimlidir
+    pipe.enable_group_offload(
+        onload_device=torch.device("cuda"),
+        offload_device=torch.device("cpu"),
+        offload_type="leaf_level",  # En düşük bellek kullanımı için leaf seviyesi
+        use_stream=True,  # Async veri transferi için CUDA stream kullan
+    )
 
     print("Model başarıyla yüklendi.")
 except Exception as e:
