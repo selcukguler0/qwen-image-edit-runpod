@@ -5,6 +5,7 @@ WORKDIR /app
 # Hızlı indirme için HF_TRANSFER'i aktif et
 ENV HF_HUB_ENABLE_HF_TRANSFER=1
 
+# Gerekli kütüphaneleri kur
 RUN pip install --no-cache-dir \
     diffusers \
     transformers \
@@ -12,13 +13,14 @@ RUN pip install --no-cache-dir \
     runpod \
     requests \
     pillow \
-    bitsandbytes \
     hf_transfer
 
-# Önce indirme scriptini kopyala ve MODELLERİ İNDİR
+# Model indirme scriptini kopyala ve modelleri indir
 COPY download_model.py .
 RUN python -u download_model.py && rm download_model.py
 
+# Handler'ı kopyala
 COPY handler.py .
-# Artık /app/model_weights gibi ekstra klasörlere gerek kalmadı
+
+# Servisi başlat
 CMD ["python", "-u", "handler.py"]
