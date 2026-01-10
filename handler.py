@@ -24,12 +24,10 @@ try:
     # Qwen-Image için resmi olarak önerilen bellek optimizasyonu
     # enable_group_offload: Layer gruplarını async stream ile GPU/CPU arasında taşır
     # Bu yöntem sequential_cpu_offload'dan daha hızlı ve verimlidir
-    pipe.enable_group_offload(
-        onload_device=torch.device("cuda"),
-        offload_device=torch.device("cpu"),
-        offload_type="leaf_level",  # En düşük bellek kullanımı için leaf seviyesi
-        use_stream=True,  # Async veri transferi için CUDA stream kullan
-    )
+    pipe.to("cuda")
+
+    # Bellek verimliliği için xformers veya sdp kullanın (Hızlandırır)
+    pipe.enable_attention_slicing()
 
     print("Model başarıyla yüklendi.")
 except Exception as e:
