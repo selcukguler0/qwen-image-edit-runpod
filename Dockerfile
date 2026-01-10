@@ -1,12 +1,10 @@
-FROM runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
+FROM runpod/pytorch:1.0.3-cu1290-torch290-ubuntu2204
 
 WORKDIR /app
 
 # Hızlı indirme için HF_TRANSFER'i aktif et
 ENV HF_HUB_ENABLE_HF_TRANSFER=1
 
-# Gerekli kütüphaneleri kur
-# 8-bit (FP8 benzeri) kullanım için 'bitsandbytes' ekledik
 RUN pip install --no-cache-dir \
     diffusers \
     transformers \
